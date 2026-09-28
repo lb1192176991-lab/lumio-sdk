@@ -3,10 +3,10 @@ import { NETWORKS } from "@lumio/shared";
 import { LumioClient, NotImplementedError, type ContractIds } from "./index";
 
 const contractIds: ContractIds = {
-  treasury: "CTREASURY000000000000000000000000000000000000000000000000",
-  governance: "CGOVERNANCE0000000000000000000000000000000000000000000000",
-  dividends: "CDIVIDENDS00000000000000000000000000000000000000000000000",
-  voting: "CVOTING0000000000000000000000000000000000000000000000000",
+  treasury: "C" + "A".repeat(55),
+  governance: "C" + "B".repeat(55),
+  dividends: "C" + "C".repeat(55),
+  voting: "C" + "D".repeat(55),
 };
 
 function makeClient(): LumioClient {
@@ -21,6 +21,27 @@ describe("LumioClient", () => {
     expect(lumio.dividends.contractId).toBe(contractIds.dividends);
     expect(lumio.voting.contractId).toBe(contractIds.voting);
     expect(lumio.treasury.network).toBe(NETWORKS.testnet);
+  });
+
+  it("throws a contract-specific error when a contract id is invalid", () => {
+    expect(
+      () =>
+        new LumioClient({
+          network: NETWORKS.testnet,
+          contractIds: {
+            ...contractIds,
+            treasury: "bad",
+          },
+        }),
+    ).toThrow(/treasury/i);
+
+    expect(
+      () =>
+        new LumioClient({
+          network: NETWORKS.testnet,
+          contractIds: { ...contractIds, treasury: "C" + "0".repeat(55) },
+        }),
+    ).toThrow(/treasury/i);
   });
 
   it("returns typed mock data for read methods", async () => {

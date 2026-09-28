@@ -24,10 +24,10 @@ import { LumioClient, type ContractIds } from "@lumio/sdk";
 import { NETWORKS } from "@lumio/shared";
 
 const contractIds: ContractIds = {
-  treasury: "CTREASURY000000000000000000000000000000000000000000000000",
-  governance: "CGOVERNANCE0000000000000000000000000000000000000000000000",
-  dividends: "CDIVIDENDS00000000000000000000000000000000000000000000000",
-  voting: "CVOTING0000000000000000000000000000000000000000000000000",
+  treasury: "C" + "A".repeat(55),
+  governance: "C" + "B".repeat(55),
+  dividends: "C" + "C".repeat(55),
+  voting: "C" + "D".repeat(55),
 };
 
 const lumio = new LumioClient({ network: NETWORKS.testnet, contractIds });

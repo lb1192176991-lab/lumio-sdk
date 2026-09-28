@@ -1,4 +1,4 @@
-import type { Address, ContractName, NetworkConfig } from "@lumio/shared";
+import { isContractId, type Address, type ContractName, type NetworkConfig } from "@lumio/shared";
 import { TreasuryClient } from "./treasury";
 import { GovernanceClient } from "./governance";
 import { DividendsClient } from "./dividends";
@@ -34,9 +34,34 @@ export class LumioClient {
 
   constructor(options: LumioClientOptions) {
     const { network, contractIds } = options;
-    this.treasury = new TreasuryClient({ contractId: contractIds.treasury, network });
-    this.governance = new GovernanceClient({ contractId: contractIds.governance, network });
-    this.dividends = new DividendsClient({ contractId: contractIds.dividends, network });
-    this.voting = new VotingClient({ contractId: contractIds.voting, network });
+
+    for (const [contractName, contractId] of Object.entries(contractIds) as Array<
+      [ContractName, Address]
+    >) {
+      if (!isContractId(contractId)) {
+        throw new Error(`Invalid ${contractName} contract id "${contractId}"`);
+      }
+    }
+
+    this.treasury = new TreasuryClient({
+      contractId: contractIds.treasury,
+      network,
+      contractName: "treasury",
+    });
+    this.governance = new GovernanceClient({
+      contractId: contractIds.governance,
+      network,
+      contractName: "governance",
+    });
+    this.dividends = new DividendsClient({
+      contractId: contractIds.dividends,
+      network,
+      contractName: "dividends",
+    });
+    this.voting = new VotingClient({
+      contractId: contractIds.voting,
+      network,
+      contractName: "voting",
+    });
   }
 }
