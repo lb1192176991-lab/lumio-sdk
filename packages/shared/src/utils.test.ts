@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import * as shared from "./index";
 import {
   truncateAddress,
   formatAmount,
@@ -22,6 +23,34 @@ import {
 import { CONTRACT_NAMES, NETWORKS } from "./types";
 import type { ProposalStatus } from "./types";
 import type { Tally } from "./types";
+
+describe("public export surface", () => {
+  it("matches the documented shared API surface", () => {
+    expect(Object.keys(shared).sort()).toEqual([
+      "CONTRACT_NAMES",
+      "InvalidAddressError",
+      "InvalidAmountError",
+      "NETWORKS",
+      "STELLAR_DECIMALS",
+      "approvalRate",
+      "approvalRateOf",
+      "assertValidAddress",
+      "formatAmount",
+      "formatAmountFixed",
+      "getNetwork",
+      "getNetworkByPassphrase",
+      "isContractId",
+      "isOpen",
+      "isPublicKey",
+      "isTerminal",
+      "isValidAddress",
+      "parseAmount",
+      "tallyTotal",
+      "truncateAddress",
+      "tryParseAmount",
+    ]);
+  });
+});
 
 describe("truncateAddress", () => {
   it("shortens long addresses with an ellipsis", () => {
