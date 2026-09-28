@@ -9,6 +9,9 @@ import {
   approvalRateOf,
   tallyTotal,
   getNetwork,
+  getNetworkByPassphrase,
+  isOpen,
+  isTerminal,
   isValidAddress,
   isContractId,
   isPublicKey,
@@ -16,7 +19,8 @@ import {
   InvalidAmountError,
   InvalidAddressError,
 } from "./utils";
-import { NETWORKS } from "./types";
+import { CONTRACT_NAMES, NETWORKS } from "./types";
+import type { ProposalStatus } from "./types";
 import type { Tally } from "./types";
 
 describe("truncateAddress", () => {
@@ -214,6 +218,24 @@ describe("approvalRate", () => {
   });
 });
 
+describe("proposal status helpers", () => {
+  const statuses: ProposalStatus[] = ["open", "passed", "rejected", "executed"];
+
+  it("identifies only open proposals as open", () => {
+    expect(statuses.map(isOpen)).toEqual([true, false, false, false]);
+  });
+
+  it("identifies every completed status as terminal", () => {
+    expect(statuses.map(isTerminal)).toEqual([false, true, true, true]);
+  });
+});
+
+describe("CONTRACT_NAMES", () => {
+  it("contains exactly the supported contract names", () => {
+    expect(CONTRACT_NAMES).toEqual(["treasury", "governance", "dividends", "voting"]);
+  });
+});
+
 describe("tallyTotal / approvalRateOf", () => {
   const tally: Tally = { yes: 3, no: 1, abstain: 2 };
 
@@ -252,6 +274,16 @@ describe("getNetwork", () => {
   it("returns the same object reference as NETWORKS[name]", () => {
     expect(getNetwork("testnet")).toBe(NETWORKS.testnet);
     expect(getNetwork("mainnet")).toBe(NETWORKS.mainnet);
+  });
+
+  it("resolves each known network by passphrase", () => {
+    for (const network of Object.values(NETWORKS)) {
+      expect(getNetworkByPassphrase(network.networkPassphrase)).toBe(network);
+    }
+  });
+
+  it("returns undefined for an unknown passphrase", () => {
+    expect(getNetworkByPassphrase("unknown passphrase")).toBeUndefined();
   });
 });
 
