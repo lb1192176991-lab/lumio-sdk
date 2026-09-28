@@ -2,13 +2,18 @@ import { describe, it, expect } from "vitest";
 import {
   truncateAddress,
   formatAmount,
+  formatAmountFixed,
   parseAmount,
+  tryParseAmount,
   approvalRate,
+  approvalRateOf,
+  tallyTotal,
   getNetwork,
   isValidAddress,
   InvalidAmountError,
 } from "./utils";
 import { NETWORKS } from "./types";
+import type { Tally } from "./types";
 
 describe("truncateAddress", () => {
   it("shortens long addresses with an ellipsis", () => {
@@ -67,6 +72,19 @@ describe("formatAmount / parseAmount", () => {
     }
   });
 
+  it("keeps trimmed formatting by default and pads fixed precision on request", () => {
+    expect(formatAmount(15_000_000n)).toBe("1.5");
+    expect(formatAmountFixed(15_000_000n, 2)).toBe("1.50");
+    expect(formatAmountFixed(15_000_000n, 3, 7)).toBe("1.500");
+  });
+
+  it("rounds fixed precision using integer arithmetic", () => {
+    expect(formatAmountFixed(12_550_000n, 1)).toBe("1.3");
+    expect(formatAmountFixed(-12_550_000n, 1)).toBe("-1.3");
+    expect(formatAmountFixed(99_999_999n, 2)).toBe("10.00");
+    expect(formatAmountFixed(15_000_000n, 0)).toBe("2");
+  });
+
   describe("parseAmount — malformed / over-precise input", () => {
     it("rejects over-precise input (more fractional digits than decimals)", () => {
       expect(() => parseAmount("0.123456789")).toThrow(InvalidAmountError);
@@ -123,6 +141,23 @@ describe("formatAmount / parseAmount", () => {
   });
 });
 
+describe("tryParseAmount", () => {
+  it("returns parsed amounts in a success result", () => {
+    expect(tryParseAmount("1.25")).toEqual({ ok: true, value: parseAmount("1.25") });
+    expect(tryParseAmount("1.25", 2)).toEqual({ ok: true, value: parseAmount("1.25", 2) });
+  });
+
+  it("returns errors for malformed and over-precise inputs without throwing", () => {
+    const malformed = ["abc", "1e3", "1_000", "$5", "", " ", "1.2.3", "0.123456789"];
+    for (const value of malformed) {
+      expect(tryParseAmount(value)).toEqual({
+        ok: false,
+        error: `Invalid amount "${value}"`,
+      });
+    }
+  });
+});
+
 describe("approvalRate", () => {
   it("computes the yes share of decisive votes", () => {
     expect(approvalRate(3, 1)).toBe(75);
@@ -159,6 +194,24 @@ describe("approvalRate", () => {
     expect(approvalRate(0, 5)).toBe(0);
     expect(approvalRate(5, 0)).toBe(100);
     expect(approvalRate(3, 1)).toBe(75);
+  });
+});
+
+describe("tallyTotal / approvalRateOf", () => {
+  const tally: Tally = { yes: 3, no: 1, abstain: 2 };
+
+  it("totals all votes including abstentions", () => {
+    expect(tallyTotal(tally)).toBe(6);
+  });
+
+  it("delegates approval rate to decisive yes/no votes", () => {
+    expect(approvalRateOf(tally)).toBe(approvalRate(tally.yes, tally.no));
+    expect(approvalRateOf(tally)).toBe(75);
+    expect(approvalRateOf({ yes: 0, no: 0, abstain: 4 })).toBe(0);
+  });
+
+  it("inherits approvalRate input validation", () => {
+    expect(() => approvalRateOf({ yes: -1, no: 0, abstain: 0 })).toThrow(RangeError);
   });
 });
 
