@@ -10,7 +10,11 @@ import {
   tallyTotal,
   getNetwork,
   isValidAddress,
+  isContractId,
+  isPublicKey,
+  assertValidAddress,
   InvalidAmountError,
+  InvalidAddressError,
 } from "./utils";
 import { NETWORKS } from "./types";
 import type { Tally } from "./types";
@@ -83,6 +87,19 @@ describe("formatAmount / parseAmount", () => {
     expect(formatAmountFixed(-12_550_000n, 1)).toBe("-1.3");
     expect(formatAmountFixed(99_999_999n, 2)).toBe("10.00");
     expect(formatAmountFixed(15_000_000n, 0)).toBe("2");
+  });
+
+  it("rejects invalid decimal counts in both conversion functions", () => {
+    for (const decimals of [-1, 1.5, NaN, Infinity]) {
+      expect(() => formatAmount(1n, decimals)).toThrow(RangeError);
+      expect(() => formatAmount(1n, decimals)).toThrow(
+        "decimals must be a non-negative safe integer",
+      );
+      expect(() => parseAmount("1", decimals)).toThrow(RangeError);
+      expect(() => parseAmount("1", decimals)).toThrow(
+        "decimals must be a non-negative safe integer",
+      );
+    }
   });
 
   describe("parseAmount — malformed / over-precise input", () => {
@@ -269,5 +286,39 @@ describe("isValidAddress", () => {
 
   it("rejects an empty string", () => {
     expect(isValidAddress("")).toBe(false);
+  });
+});
+
+describe("isContractId / isPublicKey", () => {
+  const publicKey = "GABC2DEFGHIJKLMNOPQRSTUVWXYZ234567ABCDEFGHIJKLMNOPQRSTUV";
+  const contractId = "CTREASURYBCDEFGHIJKLMNOPQRSTUVWXYZ234567ABCDEFGHIJKLMNOP";
+
+  it("accepts only the matching address kind", () => {
+    expect(isPublicKey(publicKey)).toBe(true);
+    expect(isPublicKey(contractId)).toBe(false);
+    expect(isContractId(contractId)).toBe(true);
+    expect(isContractId(publicKey)).toBe(false);
+  });
+
+  it("rejects wrong-length and non-base32 values", () => {
+    expect(isPublicKey("GABC")).toBe(false);
+    expect(isPublicKey(`G${"0".repeat(55)}`)).toBe(false);
+    expect(isContractId("CABC")).toBe(false);
+    expect(isContractId(`C${"0".repeat(55)}`)).toBe(false);
+  });
+});
+
+describe("assertValidAddress", () => {
+  const publicKey = "GABC2DEFGHIJKLMNOPQRSTUVWXYZ234567ABCDEFGHIJKLMNOPQRSTUV";
+
+  it("accepts a valid address", () => {
+    expect(() => assertValidAddress(publicKey)).not.toThrow();
+  });
+
+  it("throws InvalidAddressError with the optional label", () => {
+    expect(() => assertValidAddress("invalid")).toThrow(InvalidAddressError);
+    expect(() => assertValidAddress("invalid", "recipient")).toThrow(
+      'Invalid recipient address "invalid"',
+    );
   });
 });

@@ -4,6 +4,12 @@ import { NETWORKS } from "./types";
 /** Number of decimal places Stellar uses for native amounts. */
 export const STELLAR_DECIMALS = 7;
 
+function assertValidDecimals(decimals: number): void {
+  if (!Number.isSafeInteger(decimals) || decimals < 0) {
+    throw new RangeError(`decimals must be a non-negative safe integer, got ${decimals}`);
+  }
+}
+
 /**
  * Shorten an address for display, e.g. `truncateAddress("GABC…", 4)` → `"GABC…WXYZ"`.
  * Returns the address unchanged if it is already short enough.
@@ -25,6 +31,7 @@ export function truncateAddress(address: Address, visible = 4): string {
  * @example formatAmount(12_500_000n) // "1.25"
  */
 export function formatAmount(amount: Amount, decimals = STELLAR_DECIMALS): string {
+  assertValidDecimals(decimals);
   const negative = amount < 0n;
   const abs = negative ? -amount : amount;
   const base = 10n ** BigInt(decimals);
@@ -102,6 +109,7 @@ export class InvalidAmountError extends Error {
  * @throws {InvalidAmountError} if `value` is malformed or over-precise
  */
 export function parseAmount(value: string, decimals = STELLAR_DECIMALS): Amount {
+  assertValidDecimals(decimals);
   // Strict format: optional -, digits, optional (.digits)
   const VALID = /^-?\d+(\.\d+)?$/;
   if (!VALID.test(value.trim())) {
@@ -191,4 +199,29 @@ export function getNetwork(name: NetworkName): NetworkConfig {
  */
 export function isValidAddress(value: string): boolean {
   return /^[GC][A-Z2-7]{55}$/.test(value);
+}
+
+/** Returns `true` when `value` has the shape of a Stellar contract id. */
+export function isContractId(value: string): value is Address {
+  return value.startsWith("C") && isValidAddress(value);
+}
+
+/** Returns `true` when `value` has the shape of a Stellar public key. */
+export function isPublicKey(value: string): value is Address {
+  return value.startsWith("G") && isValidAddress(value);
+}
+
+/** Thrown when a value does not have the shape of a Stellar address. */
+export class InvalidAddressError extends Error {
+  constructor(value: string, label?: string) {
+    super(label ? `Invalid ${label} address "${value}"` : `Invalid address "${value}"`);
+    this.name = "InvalidAddressError";
+  }
+}
+
+/** Throws when `value` does not have the shape of a Stellar address. */
+export function assertValidAddress(value: string, label?: string): asserts value is Address {
+  if (!isValidAddress(value)) {
+    throw new InvalidAddressError(value, label);
+  }
 }
