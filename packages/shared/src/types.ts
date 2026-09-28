@@ -16,7 +16,9 @@ export type Address = string;
 export type Amount = bigint;
 
 /** The four Lumio contracts the SDK talks to. */
-export type ContractName = "treasury" | "governance" | "dividends" | "voting";
+export const CONTRACT_NAMES = ["treasury", "governance", "dividends", "voting"] as const;
+
+export type ContractName = (typeof CONTRACT_NAMES)[number];
 
 /** A member of a savings group / cooperative. */
 export interface Member {

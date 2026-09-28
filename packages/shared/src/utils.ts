@@ -1,4 +1,4 @@
-import type { Address, Amount, NetworkConfig, NetworkName } from "./types";
+import type { Address, Amount, NetworkConfig, NetworkName, ProposalStatus } from "./types";
 import { NETWORKS } from "./types";
 
 /** Number of decimal places Stellar uses for native amounts. */
@@ -113,6 +113,38 @@ export function approvalRate(yes: number, no: number, decimalPlaces = 1): number
   return Math.round((yes / total) * 100 * factor) / factor;
 }
 
+function assertNever(value: never): never {
+  throw new Error(`Unexpected value: ${value}`);
+}
+
+/** Return whether a proposal is open for voting. */
+export function isOpen(status: ProposalStatus): boolean {
+  switch (status) {
+    case "open":
+      return true;
+    case "passed":
+    case "rejected":
+    case "executed":
+      return false;
+    default:
+      return assertNever(status);
+  }
+}
+
+/** Return whether a proposal has reached a terminal status. */
+export function isTerminal(status: ProposalStatus): boolean {
+  switch (status) {
+    case "open":
+      return false;
+    case "passed":
+    case "rejected":
+    case "executed":
+      return true;
+    default:
+      return assertNever(status);
+  }
+}
+
 /**
  * Resolve a {@link NetworkConfig} by its well-known name.
  *
@@ -120,6 +152,11 @@ export function approvalRate(yes: number, no: number, decimalPlaces = 1): number
  */
 export function getNetwork(name: NetworkName): NetworkConfig {
   return NETWORKS[name];
+}
+
+/** Resolve a known network by its Stellar network passphrase. */
+export function getNetworkByPassphrase(passphrase: string): NetworkConfig | undefined {
+  return Object.values(NETWORKS).find((network) => network.networkPassphrase === passphrase);
 }
 
 /**
