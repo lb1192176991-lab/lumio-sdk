@@ -1,4 +1,4 @@
-import type { Address, Amount, NetworkConfig, NetworkName, ProposalStatus } from "./types";
+import type { Address, Amount, NetworkConfig, NetworkName, ProposalStatus, Tally } from "./types";
 import { NETWORKS } from "./types";
 
 /** Number of decimal places Stellar uses for native amounts. */
@@ -39,6 +39,45 @@ export function formatAmount(amount: Amount, decimals = STELLAR_DECIMALS): strin
   const frac = abs % base;
   const fracStr = frac.toString().padStart(decimals, "0").replace(/0+$/, "");
   const body = fracStr ? `${whole}.${fracStr}` : `${whole}`;
+  return negative ? `-${body}` : body;
+}
+
+/**
+ * Format a raw on-chain amount with exactly `fractionDigits` decimal places.
+ * Midpoint values are rounded away from zero.
+ */
+export function formatAmountFixed(
+  amount: Amount,
+  fractionDigits: number,
+  decimals = STELLAR_DECIMALS,
+): string {
+  if (!Number.isSafeInteger(fractionDigits) || fractionDigits < 0) {
+    throw new RangeError(
+      `fractionDigits must be a non-negative safe integer, got ${fractionDigits}`,
+    );
+  }
+  if (!Number.isSafeInteger(decimals) || decimals < 0) {
+    throw new RangeError(`decimals must be a non-negative safe integer, got ${decimals}`);
+  }
+
+  const negative = amount < 0n;
+  const abs = negative ? -amount : amount;
+  let scaled = abs;
+
+  if (fractionDigits < decimals) {
+    const divisor = 10n ** BigInt(decimals - fractionDigits);
+    scaled = (abs + divisor / 2n) / divisor;
+  } else if (fractionDigits > decimals) {
+    scaled *= 10n ** BigInt(fractionDigits - decimals);
+  }
+
+  const base = 10n ** BigInt(fractionDigits);
+  const whole = scaled / base;
+  const fraction = scaled % base;
+  const body =
+    fractionDigits === 0
+      ? `${whole}`
+      : `${whole}.${fraction.toString().padStart(fractionDigits, "0")}`;
   return negative ? `-${body}` : body;
 }
 
@@ -93,6 +132,21 @@ export function parseAmount(value: string, decimals = STELLAR_DECIMALS): Amount 
   return negative ? -raw : raw;
 }
 
+/** Parse an amount without throwing for invalid amount strings. */
+export function tryParseAmount(
+  value: string,
+  decimals = STELLAR_DECIMALS,
+): { ok: true; value: Amount } | { ok: false; error: string } {
+  try {
+    return { ok: true, value: parseAmount(value, decimals) };
+  } catch (error) {
+    if (error instanceof InvalidAmountError) {
+      return { ok: false, error: error.message };
+    }
+    throw error;
+  }
+}
+
 /**
  * Percentage of yes-votes among decisive (yes + no) votes, 0–100.
  * Abstentions are excluded from the denominator. Returns 0 when there are no
@@ -143,6 +197,16 @@ export function isTerminal(status: ProposalStatus): boolean {
     default:
       return assertNever(status);
   }
+}
+
+/** Return the total number of votes, including abstentions. */
+export function tallyTotal(tally: Tally): number {
+  return tally.yes + tally.no + tally.abstain;
+}
+
+/** Return the yes-vote percentage among decisive votes in a tally. */
+export function approvalRateOf(tally: Tally): number {
+  return approvalRate(tally.yes, tally.no);
 }
 
 /**
