@@ -12,8 +12,12 @@ import { cn } from "./cn";
 afterEach(cleanup);
 
 describe("cn", () => {
-  it("joins truthy class names and drops falsy ones", () => {
-    expect(cn("a", false, null, undefined, "b")).toBe("a b");
+  it("joins class names and drops empty non-numeric values", () => {
+    expect(cn("a", false, null, undefined, "", "b")).toBe("a b");
+  });
+
+  it("keeps numeric class names including zero", () => {
+    expect(cn("a", 0, 2, "b")).toBe("a 0 2 b");
   });
 });
 
