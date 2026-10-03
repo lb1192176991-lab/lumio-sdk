@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
 // Not using vitest `globals`, so register Testing Library's DOM cleanup ourselves.
@@ -42,6 +43,24 @@ describe("Button", () => {
     const ref = createRef<HTMLButtonElement>();
     const { getByRole } = render(<Button ref={ref}>Ref test</Button>);
     expect(ref.current).toBe(getByRole("button", { name: "Ref test" }));
+  });
+
+  it("shows a busy spinner without changing the button's layout", () => {
+    const { getByRole } = render(
+      <Button loading className="static text-ink-950">
+        Submitting
+      </Button>,
+    );
+    const button = getByRole("button", { name: "Submitting" }) as HTMLButtonElement;
+    const spinner = button.querySelector(".lumio-button-spinner");
+
+    expect(button.disabled).toBe(true);
+    expect(button.getAttribute("aria-busy")).toBe("true");
+    expect(spinner?.getAttribute("aria-hidden")).toBe("true");
+    expect(spinner?.className).toContain("absolute");
+    expect(button.style.position).toBe("relative");
+    expect(button.style.color).toBe("transparent");
+    expect(button.className).toContain("!opacity-0");
   });
 
   it("applies the secondary variant classes", () => {
@@ -245,5 +264,55 @@ describe("Badge", () => {
   it("applies the sky variant", () => {
     const { getByText } = render(<Badge variant="sky">Info</Badge>);
     expect(getByText("Info").className).toContain("bg-sky");
+  });
+});
+
+describe("Alert", () => {
+  it.each([
+    ["info", "status", "border-sky-on-light", "text-sky-on-light"],
+    ["success", "status", "border-teal-on-light", "text-teal-on-light"],
+    ["warning", "status", "border-lumen-dim", "text-lumen-dim"],
+    ["danger", "alert", "border-coral-on-light", "text-coral-on-light"],
+  ] as const)(
+    "styles the %s variant with its semantic role",
+    (variant, role, borderClass, textClass) => {
+      const { getByRole } = render(<Alert variant={variant}>Notice</Alert>);
+      const alert = getByRole(role);
+
+      expect(alert.className).toContain(borderClass);
+      expect(alert.className).toContain(textClass);
+    },
+  );
+
+  it("forwards a ref and sets its display name", () => {
+    const ref = createRef<HTMLDivElement>();
+    const { getByRole } = render(
+      <Alert ref={ref} variant="success">
+        Saved
+      </Alert>,
+    );
+
+    expect(ref.current).toBe(getByRole("status"));
+    expect(Alert.displayName).toBe("Alert");
+  });
+});
+
+describe("Skeleton", () => {
+  it("renders as a decorative token-styled placeholder and forwards a ref", () => {
+    const ref = createRef<HTMLDivElement>();
+    const { container } = render(
+      <Skeleton ref={ref} width="75%" height={16} radius="999px" className="custom-skeleton" />,
+    );
+    const skeleton = container.firstElementChild as HTMLDivElement;
+
+    expect(skeleton.getAttribute("aria-hidden")).toBe("true");
+    expect(skeleton.className).toContain("bg-ink-700");
+    expect(skeleton.className).toContain("custom-skeleton");
+    expect(skeleton.className).toContain("motion-reduce:animate-none");
+    expect(skeleton.style.width).toBe("75%");
+    expect(skeleton.style.height).toBe("16px");
+    expect(skeleton.style.borderRadius).toBe("999px");
+    expect(ref.current).toBe(skeleton);
+    expect(Skeleton.displayName).toBe("Skeleton");
   });
 });

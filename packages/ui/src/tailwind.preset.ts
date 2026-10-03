@@ -86,6 +86,16 @@ export const lumioPreset: Partial<Config> = {
         base: "var(--lumio-duration-base)",
         slow: "var(--lumio-duration-slow)",
       },
+      animation: {
+        "skeleton-pulse":
+          "skeleton-pulse var(--lumio-duration-slow) var(--lumio-ease-standard) infinite alternate",
+      },
+      keyframes: {
+        "skeleton-pulse": {
+          "0%": { opacity: "0.45" },
+          "100%": { opacity: "1" },
+        },
+      },
     },
   },
 };

@@ -19,3 +19,5 @@ export {
 } from "./components/Card";
 export { Badge, type BadgeProps, type BadgeVariant } from "./components/Badge";
 export { Input, type InputProps } from "./components/Input";
+export { Alert, type AlertProps, type AlertVariant } from "./components/Alert";
+export { Skeleton, type SkeletonProps } from "./components/Skeleton";
