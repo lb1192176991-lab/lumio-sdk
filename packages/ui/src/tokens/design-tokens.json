@@ -49,9 +49,9 @@
   },
   "typography": {
     "families": {
-      "display": { "name": "Fraunces", "usage": "Marketing headlines, editorial moments, section titles on landing pages only. Never in product UI.", "license": "SIL Open Font License", "source": "Google Fonts" },
-      "ui": { "name": "IBM Plex Sans", "usage": "All product UI, body copy, buttons, navigation, forms.", "license": "SIL Open Font License", "source": "Google Fonts / IBM" },
-      "mono": { "name": "IBM Plex Mono", "usage": "Wallet addresses, contract IDs, transaction hashes, amounts in tables, code.", "license": "SIL Open Font License", "source": "Google Fonts / IBM" }
+      "display": { "name": "Fraunces", "fallbacks": "Georgia, serif", "usage": "Marketing headlines, editorial moments, section titles on landing pages only. Never in product UI.", "license": "SIL Open Font License", "source": "Google Fonts" },
+      "ui": { "name": "IBM Plex Sans", "fallbacks": "-apple-system, sans-serif", "usage": "All product UI, body copy, buttons, navigation, forms.", "license": "SIL Open Font License", "source": "Google Fonts / IBM" },
+      "mono": { "name": "IBM Plex Mono", "fallbacks": "ui-monospace, monospace", "usage": "Wallet addresses, contract IDs, transaction hashes, amounts in tables, code.", "license": "SIL Open Font License", "source": "Google Fonts / IBM" }
     },
     "scale": {
       "display-xl": { "size": "64px", "line_height": "1.05", "weight": 500, "family": "display" },
@@ -64,6 +64,23 @@
       "caption":    { "size": "12px", "line_height": "1.4",  "weight": 500, "family": "ui" },
       "data":       { "size": "15px", "line_height": "1.4",  "weight": 500, "family": "mono" }
     }
+  },
+  "radius": {
+    "s": "6px",
+    "m": "10px",
+    "l": "16px",
+    "round": "999px"
+  },
+  "shadow": {
+    "s": "0 1px 2px rgba(11, 15, 38, 0.24)",
+    "m": "0 4px 12px rgba(11, 15, 38, 0.32)",
+    "l": "0 12px 32px rgba(11, 15, 38, 0.40)"
+  },
+  "motion": {
+    "ease-standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "duration-fast": "120ms",
+    "duration-base": "220ms",
+    "duration-slow": "400ms"
   },
   "logo": {
     "symbol_concept": "A ring (the full contribution cycle / the group) with one lit dot on its edge (the member currently receiving the payout). Transparent by construction — everyone can see whose turn it is.",
