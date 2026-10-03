@@ -20,17 +20,24 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, ...props
 
 Card.displayName = "Card";
 
-export type CardTitleProps = HTMLAttributes<HTMLHeadingElement>;
+export interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+}
 
 /** The heading slot for a {@link Card}. */
-export function CardTitle({ className, ...props }: CardTitleProps) {
-  return (
-    <h3
-      className={cn("font-display text-heading-m font-semibold text-paper", className)}
-      {...props}
-    />
-  );
-}
+export const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
+  ({ as: Heading = "h3", className, ...props }, ref) => {
+    return (
+      <Heading
+        ref={ref}
+        className={cn("font-display text-heading-m font-semibold text-paper", className)}
+        {...props}
+      />
+    );
+  },
+);
+
+CardTitle.displayName = "CardTitle";
 
 export type CardBodyProps = HTMLAttributes<HTMLParagraphElement>;
 

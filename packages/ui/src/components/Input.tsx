@@ -61,7 +61,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           </span>
         )}
         {error != null && (
-          <span className="mt-1 block font-ui text-body-s text-coral-on-light" id={errorId}>
+          <span
+            className="mt-1 block font-ui text-body-s text-coral-on-light"
+            id={errorId}
+            role="alert"
+          >
             {error}
           </span>
         )}

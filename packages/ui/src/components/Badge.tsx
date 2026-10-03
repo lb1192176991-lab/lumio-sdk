@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "../cn";
 
@@ -16,15 +17,20 @@ const VARIANTS: Record<BadgeVariant, string> = {
 };
 
 /** A small status pill. Colors come straight from the semantic token set. */
-export function Badge({ variant = "neutral", className, ...props }: BadgeProps) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-round px-2.5 py-0.5 font-ui text-caption font-medium",
-        VARIANTS[variant],
-        className,
-      )}
-      {...props}
-    />
-  );
-}
+export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
+  ({ variant = "neutral", className, ...props }, ref) => {
+    return (
+      <span
+        ref={ref}
+        className={cn(
+          "inline-flex items-center rounded-round px-2.5 py-0.5 font-ui text-caption font-medium",
+          VARIANTS[variant],
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+
+Badge.displayName = "Badge";

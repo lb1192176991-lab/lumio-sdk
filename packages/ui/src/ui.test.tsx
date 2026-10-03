@@ -126,6 +126,13 @@ describe("Input", () => {
     expect(getByText("Amount is required").id).toBe("amount-error");
   });
 
+  it("announces errors without making hint text a live region", () => {
+    const { getByRole, getByText } = render(<Input hint="Use whole units" error="Required" />);
+
+    expect(getByRole("alert").textContent).toBe("Required");
+    expect(getByText("Use whole units").getAttribute("role")).toBeNull();
+  });
+
   it("keeps the bare input behavior when no label or description is provided", () => {
     const { container } = render(<Input aria-label="name" />);
     const input = container.querySelector("input");
@@ -161,6 +168,33 @@ describe("CardTitle", () => {
     expect(getByText("My Title")).toBeTruthy();
   });
 
+  it("defaults to h3 and preserves styling when the heading level changes", () => {
+    const { getByRole } = render(
+      <>
+        <CardTitle>Default title</CardTitle>
+        <CardTitle as="h2">Overridden title</CardTitle>
+      </>,
+    );
+    const defaultTitle = getByRole("heading", { name: "Default title", level: 3 });
+    const overriddenTitle = getByRole("heading", { name: "Overridden title", level: 2 });
+
+    expect(defaultTitle.tagName).toBe("H3");
+    expect(overriddenTitle.tagName).toBe("H2");
+    expect(overriddenTitle.className).toBe(defaultTitle.className);
+  });
+
+  it("forwards a ref and sets its display name", () => {
+    const ref = createRef<HTMLHeadingElement>();
+    const { getByRole } = render(
+      <CardTitle ref={ref} as="h2">
+        Ref title
+      </CardTitle>,
+    );
+
+    expect(ref.current).toBe(getByRole("heading", { name: "Ref title", level: 2 }));
+    expect(CardTitle.displayName).toBe("CardTitle");
+  });
+
   it("merges a custom className", () => {
     const { getByText } = render(<CardTitle className="custom-title">Title</CardTitle>);
     expect(getByText("Title").className).toContain("custom-title");
@@ -180,6 +214,14 @@ describe("CardBody", () => {
 });
 
 describe("Badge", () => {
+  it("forwards a ref to its span and sets its display name", () => {
+    const ref = createRef<HTMLSpanElement>();
+    const { getByText } = render(<Badge ref={ref}>Ref badge</Badge>);
+
+    expect(ref.current).toBe(getByText("Ref badge"));
+    expect(Badge.displayName).toBe("Badge");
+  });
+
   it("uses the requested semantic variant — teal", () => {
     const { getByText } = render(<Badge variant="teal">Open</Badge>);
     expect(getByText("Open").className).toContain("bg-teal");
