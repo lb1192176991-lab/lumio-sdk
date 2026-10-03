@@ -1,6 +1,6 @@
 import type { Address, Amount, Dividend } from "@lumio/shared";
 import { ContractClient } from "./client";
-import { NotImplementedError } from "./errors";
+import { notImplemented } from "./errors";
 
 /**
  * Client for the `dividends` contract — surplus distribution to members.
@@ -10,7 +10,7 @@ import { NotImplementedError } from "./errors";
 export class DividendsClient extends ContractClient {
   /** Add `amount` to the distributable pool (needs signing — not wired yet). */
   async fund(_amount: Amount): Promise<void> {
-    throw new NotImplementedError("DividendsClient.fund");
+    return notImplemented("DividendsClient.fund");
   }
 
   /** The share owed to `member`. Mock `0n` until RPC is wired. */

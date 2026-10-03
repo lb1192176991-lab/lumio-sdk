@@ -10,3 +10,7 @@ export class NotImplementedError extends Error {
     this.name = "NotImplementedError";
   }
 }
+
+export function notImplemented(method: string): never {
+  throw new NotImplementedError(method);
+}

@@ -1,6 +1,6 @@
 import type { Address, Amount } from "@lumio/shared";
 import { ContractClient } from "./client";
-import { NotImplementedError } from "./errors";
+import { notImplemented } from "./errors";
 
 /**
  * Client for the `treasury` contract — the pooled group vault.
@@ -10,7 +10,7 @@ import { NotImplementedError } from "./errors";
 export class TreasuryClient extends ContractClient {
   /** Record a contribution of `amount` from `member` (needs signing — not wired yet). */
   async deposit(_member: Address, _amount: Amount): Promise<void> {
-    throw new NotImplementedError("TreasuryClient.deposit");
+    return notImplemented("TreasuryClient.deposit");
   }
 
   /** The amount `member` has contributed so far. Mock `0n` until RPC is wired. */

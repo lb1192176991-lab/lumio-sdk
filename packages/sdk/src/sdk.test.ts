@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { NETWORKS } from "@lumio/shared";
-import { LumioClient, NotImplementedError, type ContractIds } from "./index";
+import {
+  DividendsClient,
+  GovernanceClient,
+  LumioClient,
+  NotImplementedError,
+  TreasuryClient,
+  VotingClient,
+  type ContractIds,
+} from "./index";
 
 const contractIds: ContractIds = {
   treasury: "C" + "A".repeat(55),
@@ -21,6 +29,8 @@ describe("LumioClient", () => {
     expect(lumio.dividends.contractId).toBe(contractIds.dividends);
     expect(lumio.voting.contractId).toBe(contractIds.voting);
     expect(lumio.treasury.network).toBe(NETWORKS.testnet);
+    expect(lumio.contractIds).toEqual(contractIds);
+    expect(Object.isFrozen(lumio.contractIds)).toBe(true);
   });
 
   it("throws a contract-specific error when a contract id is invalid", () => {
@@ -66,6 +76,104 @@ describe("LumioClient", () => {
     await expect(lumio.dividends.fund(1n)).rejects.toBeInstanceOf(NotImplementedError);
     await expect(lumio.voting.castVote(1, contractIds.voting, "yes")).rejects.toBeInstanceOf(
       NotImplementedError,
+    );
+  });
+});
+
+describe("individual contract clients", () => {
+  it("store the contract id and network passed to their constructors", () => {
+    const treasury = new TreasuryClient({
+      contractId: contractIds.treasury,
+      network: NETWORKS.testnet,
+    });
+    const governance = new GovernanceClient({
+      contractId: contractIds.governance,
+      network: NETWORKS.testnet,
+    });
+    const dividends = new DividendsClient({
+      contractId: contractIds.dividends,
+      network: NETWORKS.testnet,
+    });
+    const voting = new VotingClient({
+      contractId: contractIds.voting,
+      network: NETWORKS.testnet,
+    });
+
+    expect(treasury.contractId).toBe(contractIds.treasury);
+    expect(treasury.network).toBe(NETWORKS.testnet);
+    expect(governance.contractId).toBe(contractIds.governance);
+    expect(governance.network).toBe(NETWORKS.testnet);
+    expect(dividends.contractId).toBe(contractIds.dividends);
+    expect(dividends.network).toBe(NETWORKS.testnet);
+    expect(voting.contractId).toBe(contractIds.voting);
+    expect(voting.network).toBe(NETWORKS.testnet);
+  });
+
+  it("returns the documented mock values from every read method", async () => {
+    const treasury = new TreasuryClient({
+      contractId: contractIds.treasury,
+      network: NETWORKS.testnet,
+    });
+    const governance = new GovernanceClient({
+      contractId: contractIds.governance,
+      network: NETWORKS.testnet,
+    });
+    const dividends = new DividendsClient({
+      contractId: contractIds.dividends,
+      network: NETWORKS.testnet,
+    });
+    const voting = new VotingClient({
+      contractId: contractIds.voting,
+      network: NETWORKS.testnet,
+    });
+
+    expect(await treasury.balanceOf(contractIds.treasury)).toBe(0n);
+    expect(await treasury.total()).toBe(0n);
+    expect(await governance.getProposal(1)).toBeNull();
+    expect(await governance.proposalCount()).toBe(0);
+    expect(await dividends.shareOf(contractIds.dividends)).toBe(0n);
+    expect(await dividends.listShares()).toEqual([]);
+    expect(await dividends.pool()).toBe(0n);
+    expect(await voting.tally(1)).toEqual({ yes: 0, no: 0, abstain: 0 });
+  });
+
+  it("throws the existing NotImplementedError for every write method", async () => {
+    const treasury = new TreasuryClient({
+      contractId: contractIds.treasury,
+      network: NETWORKS.testnet,
+    });
+    const governance = new GovernanceClient({
+      contractId: contractIds.governance,
+      network: NETWORKS.testnet,
+    });
+    const dividends = new DividendsClient({
+      contractId: contractIds.dividends,
+      network: NETWORKS.testnet,
+    });
+    const voting = new VotingClient({
+      contractId: contractIds.voting,
+      network: NETWORKS.testnet,
+    });
+    const expectNotImplemented = async (operation: Promise<unknown>, method: string) => {
+      const error = await operation.catch((reason: unknown) => reason);
+      expect(error).toBeInstanceOf(NotImplementedError);
+      expect(error).toMatchObject({
+        message: `${method} is not implemented yet — Soroban RPC wiring lands in a later phase.`,
+      });
+    };
+
+    await expectNotImplemented(
+      treasury.deposit(contractIds.treasury, 1n),
+      "TreasuryClient.deposit",
+    );
+    await expectNotImplemented(
+      governance.createProposal(contractIds.governance, "Raise dues"),
+      "GovernanceClient.createProposal",
+    );
+    await expectNotImplemented(dividends.fund(1n), "DividendsClient.fund");
+    await expectNotImplemented(
+      voting.castVote(1, contractIds.voting, "yes"),
+      "VotingClient.castVote",
     );
   });
 });

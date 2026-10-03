@@ -27,6 +27,7 @@ export interface LumioClientOptions {
  * {@link NotImplementedError} for writes until Soroban RPC wiring lands.
  */
 export class LumioClient {
+  readonly contractIds: Readonly<ContractIds>;
   readonly treasury: TreasuryClient;
   readonly governance: GovernanceClient;
   readonly dividends: DividendsClient;
@@ -43,23 +44,24 @@ export class LumioClient {
       }
     }
 
+    this.contractIds = Object.freeze({ ...contractIds });
     this.treasury = new TreasuryClient({
-      contractId: contractIds.treasury,
+      contractId: this.contractIds.treasury,
       network,
       contractName: "treasury",
     });
     this.governance = new GovernanceClient({
-      contractId: contractIds.governance,
+      contractId: this.contractIds.governance,
       network,
       contractName: "governance",
     });
     this.dividends = new DividendsClient({
-      contractId: contractIds.dividends,
+      contractId: this.contractIds.dividends,
       network,
       contractName: "dividends",
     });
     this.voting = new VotingClient({
-      contractId: contractIds.voting,
+      contractId: this.contractIds.voting,
       network,
       contractName: "voting",
     });
