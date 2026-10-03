@@ -1,6 +1,6 @@
 import type { Address, Proposal } from "@lumio/shared";
 import { ContractClient } from "./client";
-import { NotImplementedError } from "./errors";
+import { notImplemented } from "./errors";
 
 /**
  * Client for the `governance` contract — proposals and voting rules.
@@ -11,7 +11,7 @@ import { NotImplementedError } from "./errors";
 export class GovernanceClient extends ContractClient {
   /** Create a proposal authored by `proposer` (needs signing — not wired yet). */
   async createProposal(_proposer: Address, _title: string): Promise<number> {
-    throw new NotImplementedError("GovernanceClient.createProposal");
+    return notImplemented("GovernanceClient.createProposal");
   }
 
   /** Fetch a proposal by id. Mock `null` until RPC is wired. */
