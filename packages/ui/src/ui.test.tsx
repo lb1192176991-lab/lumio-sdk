@@ -63,6 +63,25 @@ describe("Button", () => {
     expect(button.className).toContain("!opacity-0");
   });
 
+  it("applies the disabled state and styles", () => {
+    const { getByRole } = render(<Button disabled>Disabled</Button>);
+    const button = getByRole("button", { name: "Disabled" }) as HTMLButtonElement;
+
+    expect(button.disabled).toBe(true);
+    expect(button.className).toContain("disabled:cursor-not-allowed");
+    expect(button.className).toContain("disabled:opacity-50");
+  });
+
+  it("includes the focus-visible outline classes", () => {
+    const { getByRole } = render(<Button>Focus</Button>);
+    const className = getByRole("button", { name: "Focus" }).className;
+
+    expect(className).toContain("focus-visible:outline");
+    expect(className).toContain("focus-visible:outline-2");
+    expect(className).toContain("focus-visible:outline-offset-2");
+    expect(className).toContain("focus-visible:outline-lumen");
+  });
+
   it("applies the secondary variant classes", () => {
     const { getByRole } = render(<Button variant="secondary">Save</Button>);
     expect(getByRole("button").className).toContain("bg-ink-700");
