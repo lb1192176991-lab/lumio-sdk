@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Label } from "./components/Label";
 import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
@@ -333,5 +334,26 @@ describe("Skeleton", () => {
     expect(skeleton.style.borderRadius).toBe("999px");
     expect(ref.current).toBe(skeleton);
     expect(Skeleton.displayName).toBe("Skeleton");
+  });
+});
+
+
+describe("Label", () => {
+  it("renders a label with the shared label classes and forwards htmlFor", () => {
+    const { getByText } = render(<Label htmlFor="amount">Amount</Label>);
+    const label = getByText("Amount");
+
+    expect(label.tagName).toBe("LABEL");
+    expect(label.getAttribute("for")).toBe("amount");
+    expect(label.className).toContain("text-body-s");
+    expect(label.className).toContain("text-paper");
+  });
+
+  it("forwards a ref and merges className", () => {
+    const ref = createRef<HTMLLabelElement>();
+    const { getByText } = render(<Label ref={ref} className="custom-label">Name</Label>);
+
+    expect(ref.current).toBe(getByText("Name"));
+    expect(getByText("Name").className).toContain("custom-label");
   });
 });
