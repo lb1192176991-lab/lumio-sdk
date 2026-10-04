@@ -51,6 +51,19 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm test
 
 Formatting is checked with Prettier — run `pnpm format` to auto-fix (or `pnpm format:check` to verify).
 
+Every PR that changes files under `packages/` must include a `.changeset/*.md` entry. For a
+package change that does not need a release, add an empty changeset instead:
+
+```md
+---
+---
+```
+
+CI also checks PR titles against Conventional Commits. Use `feat`, `fix`, `docs`, `style`,
+`refactor`, `perf`, `test`, `build`, or `revert` with a `(shared)`, `(sdk)`, or `(ui)` scope;
+`ci:`, `chore:`, and `docs:` may be scopeless. Breaking changes may use `!` before the colon.
+Examples: `feat(shared): add amount parser` and `ci: update dependency checks`.
+
 ## Making a change
 
 1. **Find or open an issue.** Browse [`good first issue`](https://github.com/lumio-network/lumio-sdk/labels/good%20first%20issue)
