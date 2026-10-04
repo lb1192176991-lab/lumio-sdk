@@ -12,6 +12,7 @@ import {
   tallyTotal,
   getNetwork,
   getNetworkByPassphrase,
+  isNetworkName,
   isOpen,
   isTerminal,
   isValidAddress,
@@ -21,7 +22,7 @@ import {
   InvalidAmountError,
   InvalidAddressError,
 } from "./utils";
-import { CONTRACT_NAMES, NETWORKS } from "./types";
+import { CONTRACT_NAMES, NETWORKS, NETWORK_NAMES } from "./types";
 import type { ProposalStatus } from "./types";
 import type { Tally } from "./types";
 
@@ -32,6 +33,7 @@ describe("public export surface", () => {
       "InvalidAddressError",
       "InvalidAmountError",
       "NETWORKS",
+      "NETWORK_NAMES",
       "STELLAR_DECIMALS",
       "approvalRate",
       "approvalRateOf",
@@ -42,6 +44,7 @@ describe("public export surface", () => {
       "getNetwork",
       "getNetworkByPassphrase",
       "isContractId",
+      "isNetworkName",
       "isOpen",
       "isPublicKey",
       "isTerminal",
@@ -360,6 +363,42 @@ describe("getNetwork", () => {
 
   it("returns undefined for an unknown passphrase", () => {
     expect(getNetworkByPassphrase("unknown passphrase")).toBeUndefined();
+  });
+});
+
+describe("NETWORK_NAMES", () => {
+  it("contains exactly the supported network names", () => {
+    expect(NETWORK_NAMES).toEqual(["testnet", "futurenet", "mainnet"]);
+  });
+
+  it("matches the keys of NETWORKS", () => {
+    expect([...NETWORK_NAMES]).toEqual(Object.keys(NETWORKS));
+  });
+});
+
+describe("isNetworkName", () => {
+  it("accepts every known network name", () => {
+    expect(isNetworkName("testnet")).toBe(true);
+    expect(isNetworkName("futurenet")).toBe(true);
+    expect(isNetworkName("mainnet")).toBe(true);
+  });
+
+  it("rejects unknown or mistyped names", () => {
+    expect(isNetworkName("unknown")).toBe(false);
+    expect(isNetworkName("")).toBe(false);
+    expect(isNetworkName("Testnet")).toBe(false);
+    expect(isNetworkName("main")).toBe(false);
+  });
+
+  it("narrows a string so it can be passed to getNetwork", () => {
+    const value: string = "testnet";
+    expect(isNetworkName(value)).toBe(true);
+    if (isNetworkName(value)) {
+      // Type-checks only when the guard narrows string → NetworkName.
+      expect(getNetwork(value).rpcUrl).toBe("https://soroban-testnet.stellar.org");
+    } else {
+      throw new Error('guard should have accepted "testnet"');
+    }
   });
 });
 
