@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Textarea } from "./components/Textarea";
 import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
@@ -180,6 +181,75 @@ describe("Input", () => {
     expect(input?.hasAttribute("id")).toBe(false);
     expect(input?.hasAttribute("aria-describedby")).toBe(false);
     expect(input?.hasAttribute("aria-invalid")).toBe(false);
+  });
+});
+
+describe("Textarea", () => {
+  it("forwards a ref to the underlying <textarea> element", () => {
+    const ref = createRef<HTMLTextAreaElement>();
+    const { getByRole } = render(<Textarea ref={ref} aria-label="test textarea" />);
+    expect(ref.current).toBe(getByRole("textbox", { name: "test textarea" }));
+  });
+
+  it("forwards the placeholder attribute", () => {
+    const { getByPlaceholderText } = render(<Textarea placeholder="Enter details" />);
+    expect(getByPlaceholderText("Enter details")).toBeTruthy();
+  });
+
+  it("forwards the disabled attribute", () => {
+    const { getByRole } = render(<Textarea aria-label="disabled field" disabled />);
+    expect((getByRole("textbox") as HTMLTextAreaElement).disabled).toBe(true);
+  });
+
+  it("merges a custom className", () => {
+    const { getByRole } = render(<Textarea aria-label="styled" className="custom-class" />);
+    expect(getByRole("textbox").className).toContain("custom-class");
+  });
+
+  it("associates a label with the textarea using a generated id", () => {
+    const { getByLabelText, getByText } = render(<Textarea label="Description" />);
+    const textarea = getByLabelText("Description");
+    const label = getByText("Description");
+
+    expect(textarea).toBeTruthy();
+    expect(label.getAttribute("for")).toBe(textarea.getAttribute("id"));
+  });
+
+  it("preserves a provided id and wires hint and error text to the textarea", () => {
+    const { getByRole, getByText } = render(
+      <Textarea
+        id="description"
+        label="Description"
+        hint="Add some details"
+        error="Description is required"
+        aria-describedby="external-description"
+      />,
+    );
+    const textarea = getByRole("textbox", { name: "Description" });
+    const description = textarea.getAttribute("aria-describedby")?.split(" ");
+
+    expect(textarea.id).toBe("description");
+    expect(description).toEqual(["external-description", "description-hint", "description-error"]);
+    expect(textarea.getAttribute("aria-invalid")).toBe("true");
+    expect(getByText("Add some details").id).toBe("description-hint");
+    expect(getByText("Description is required").id).toBe("description-error");
+  });
+
+  it("announces errors without making hint text a live region", () => {
+    const { getByRole, getByText } = render(<Textarea hint="Add some details" error="Required" />);
+
+    expect(getByRole("alert").textContent).toBe("Required");
+    expect(getByText("Add some details").getAttribute("role")).toBeNull();
+  });
+
+  it("keeps the bare textarea behavior when no label or description is provided", () => {
+    const { container } = render(<Textarea aria-label="description" />);
+    const textarea = container.querySelector("textarea");
+
+    expect(container.firstElementChild).toBe(textarea);
+    expect(textarea?.hasAttribute("id")).toBe(false);
+    expect(textarea?.hasAttribute("aria-describedby")).toBe(false);
+    expect(textarea?.hasAttribute("aria-invalid")).toBe(false);
   });
 });
 
