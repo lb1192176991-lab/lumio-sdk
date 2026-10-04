@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Spinner } from "./components/Spinner";
 import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
@@ -333,5 +334,32 @@ describe("Skeleton", () => {
     expect(skeleton.style.borderRadius).toBe("999px");
     expect(ref.current).toBe(skeleton);
     expect(Skeleton.displayName).toBe("Skeleton");
+  });
+});
+
+
+describe("Spinner", () => {
+  it("renders with role status and an accessible name", () => {
+    const { getByRole } = render(<Spinner />);
+    const spinner = getByRole("status", { name: "Loading" });
+
+    expect(spinner.className).toContain("animate-spin");
+    expect(spinner.className).toContain("motion-reduce:animate-none");
+  });
+
+  it("applies the requested size class", () => {
+    const { getByRole } = render(<Spinner size="lg" label="Saving" />);
+    const spinner = getByRole("status", { name: "Saving" });
+
+    expect(spinner.className).toContain("h-8");
+    expect(spinner.className).toContain("w-8");
+  });
+
+  it("forwards a ref and sets its display name", () => {
+    const ref = createRef<HTMLSpanElement>();
+    const { getByRole } = render(<Spinner ref={ref} />);
+
+    expect(ref.current).toBe(getByRole("status"));
+    expect(Spinner.displayName).toBe("Spinner");
   });
 });
