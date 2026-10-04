@@ -82,14 +82,14 @@ const treasury = new TreasuryClient({ contractId: contractIds.treasury, network:
 
 Every client above extends the exported `ContractClient` base class. It holds the contract's
 `contractId` and `network`, and validates the contract id on construction, throwing
-`Invalid <label> contract id "<id>"` when the value is not a `C…` address. Subclasses add one method
-per contract entrypoint:
+`Invalid <label> contract id "<id>"` when the value is not a `C…` address. Subclasses add typed
+methods for the contract entrypoints they cover — coverage is not complete for every contract yet:
 
 ```ts
 import { ContractClient } from "@lumio/sdk";
 
 class MyClient extends ContractClient {
-  // one method per contract entrypoint
+  // typed methods for the entrypoints this client covers
 }
 ```
 
