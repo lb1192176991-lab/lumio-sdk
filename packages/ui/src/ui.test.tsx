@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Link } from "./components/Link";
 import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
@@ -333,5 +334,30 @@ describe("Skeleton", () => {
     expect(skeleton.style.borderRadius).toBe("999px");
     expect(ref.current).toBe(skeleton);
     expect(Skeleton.displayName).toBe("Skeleton");
+  });
+});
+
+
+describe("Link", () => {
+  it("renders an anchor with the sky-on-light token class by default", () => {
+    const { getByRole } = render(<Link href="https://example.com">Docs</Link>);
+    const link = getByRole("link", { name: "Docs" });
+
+    expect(link.getAttribute("href")).toBe("https://example.com");
+    expect(link.className).toContain("text-sky-on-light");
+  });
+
+  it("uses the dark-surface sky token when requested", () => {
+    const { getByRole } = render(<Link variant="on-dark" href="#">Docs</Link>);
+
+    expect(getByRole("link").className).toContain("text-sky");
+  });
+
+  it("forwards a ref and merges className", () => {
+    const ref = createRef<HTMLAnchorElement>();
+    const { getByRole } = render(<Link ref={ref} href="#" className="custom-link">x</Link>);
+
+    expect(ref.current).toBe(getByRole("link"));
+    expect(getByRole("link").className).toContain("custom-link");
   });
 });
