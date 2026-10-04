@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Code } from "./components/Code";
 import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
@@ -333,5 +334,26 @@ describe("Skeleton", () => {
     expect(skeleton.style.borderRadius).toBe("999px");
     expect(ref.current).toBe(skeleton);
     expect(Skeleton.displayName).toBe("Skeleton");
+  });
+});
+
+
+describe("Code", () => {
+  it("renders a code element with the mono data token classes", () => {
+    const { container } = render(<Code>0x1234abcd</Code>);
+    const code = container.querySelector("code");
+
+    expect(code).toBeTruthy();
+    expect(code?.className).toContain("font-mono");
+    expect(code?.className).toContain("text-data");
+    expect(code?.className).toContain("text-paper");
+  });
+
+  it("forwards a ref and merges className", () => {
+    const ref = createRef<HTMLElement>();
+    const { container } = render(<Code ref={ref} className="custom-code">abc</Code>);
+
+    expect(ref.current).toBe(container.querySelector("code"));
+    expect(container.querySelector("code")?.className).toContain("custom-code");
   });
 });
