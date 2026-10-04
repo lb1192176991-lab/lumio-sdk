@@ -6,6 +6,7 @@ import { Badge } from "./components/Badge";
 import { Button } from "./components/Button";
 import { Card, CardBody, CardTitle } from "./components/Card";
 import { Input } from "./components/Input";
+import { Divider } from "./components/Divider";
 import { Alert, Skeleton } from "./index";
 import { cn } from "./cn";
 
@@ -333,5 +334,33 @@ describe("Skeleton", () => {
     expect(skeleton.style.borderRadius).toBe("999px");
     expect(ref.current).toBe(skeleton);
     expect(Skeleton.displayName).toBe("Skeleton");
+  });
+});
+
+
+describe("Divider", () => {
+  it("renders a horizontal separator by default", () => {
+    const { getByRole } = render(<Divider />);
+    const divider = getByRole("separator");
+
+    expect(divider.getAttribute("aria-orientation")).toBe("horizontal");
+    expect(divider.className).toContain("border-t");
+    expect(divider.className).toContain("border-ink-700");
+  });
+
+  it("renders a vertical separator when requested", () => {
+    const { getByRole } = render(<Divider orientation="vertical" />);
+    const divider = getByRole("separator");
+
+    expect(divider.getAttribute("aria-orientation")).toBe("vertical");
+    expect(divider.className).toContain("border-l");
+  });
+
+  it("forwards a ref and merges className", () => {
+    const ref = createRef<HTMLDivElement>();
+    const { getByRole } = render(<Divider ref={ref} className="custom-divider" />);
+
+    expect(ref.current).toBe(getByRole("separator"));
+    expect(getByRole("separator").className).toContain("custom-divider");
   });
 });
