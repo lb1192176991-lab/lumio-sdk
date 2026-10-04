@@ -137,6 +137,29 @@ describe("formatAmount / parseAmount", () => {
     }
   });
 
+  describe("formatAmount with non-default decimals", () => {
+    it("formats fractional values at 2 decimals", () => {
+      expect(formatAmount(12345n, 2)).toBe("123.45");
+      expect(formatAmount(-12345n, 2)).toBe("-123.45");
+    });
+
+    it("trims fractional trailing zeros at a custom precision", () => {
+      expect(formatAmount(100n, 2)).toBe("1");
+      expect(formatAmount(150n, 2)).toBe("1.5");
+      expect(formatAmount(1_230_000_000_000_000_000n, 18)).toBe("1.23");
+    });
+
+    it("returns a whole number when decimals = 0", () => {
+      expect(formatAmount(5n, 0)).toBe("5");
+      expect(formatAmount(0n, 0)).toBe("0");
+      expect(formatAmount(-5n, 0)).toBe("-5");
+    });
+
+    it("formats a full fractional value at 18 decimals", () => {
+      expect(formatAmount(1_234_567_890_123_456_789n, 18)).toBe("1.234567890123456789");
+    });
+  });
+
   describe("parseAmount — malformed / over-precise input", () => {
     it("rejects over-precise input (more fractional digits than decimals)", () => {
       expect(() => parseAmount("0.123456789")).toThrow(InvalidAmountError);
